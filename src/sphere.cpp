@@ -18,6 +18,15 @@ Eigen::Vector4d Sphere::getCenterPoint() {
     return this->centerPoint;
 }
 
+Eigen::Vector2d Sphere::calculateUVMapping(Eigen::Vector4d intersectionPoint) {
+    // Reference: https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
+    Eigen::Vector4d surfacePoint = intersectionPoint - this->getCenterPoint();
+    Eigen::Vector4d d = surfacePoint/surfacePoint.norm();
+    double u = 0.5 + atan2(d.z(), d.x())/(2*M_PI);
+    double v = 0.5 - asin(d.y())/M_PI;
+    return Eigen::Vector2d(u, v);
+}
+
 std::string Sphere::getType() {
     return std::string("sphere");
 }

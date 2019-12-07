@@ -29,13 +29,27 @@ Image RayTracingRenderer::render(Scene scene, ProjectionType projectionType) {
 
     Image image(this->viewport->getWidth(), this->viewport->getHeight());
 
-    tbb::parallel_for(0, this->viewport->getWidth(), [&](int x) {
-        tbb::parallel_for(0, this->viewport->getHeight(), [&](int y) {
+    // tbb::parallel_for(0, this->viewport->getWidth(), [&](int x) {
+    //     tbb::parallel_for(0, this->viewport->getHeight(), [&](int y) {
+    for(int x = 0; x < this->viewport->getWidth(); x++) {
+        for(int y = 0; y < this->viewport->getHeight(); y++) {
+            // Render background
+            int stride = 50;
+            if ((x/stride) % 2 == (y/stride) % 2)  {
+                image.setPixel(x, y, ColorFactory::generateGray());
+            } else {
+                image.setPixel(x, y, ColorFactory::generateWhite());
+            }
+
+            // Render surfaces
             auto ray = this->generateRay(x, y, projectionType);
-            auto pixel = this->calculatePixelColor(scene, ray);
-            image.setPixel(x, y, pixel);
-        });
-    });
+            auto color = this->calculatePixelColor(scene, ray);
+            if (color != nullptr)
+                image.setPixel(x, y, color);
+        };
+    };
+    //     });
+    // });
 
     return image;
 }
@@ -78,31 +92,68 @@ Ray RayTracingRenderer::generateRay(int x, int y, ProjectionType projectionType)
 }
 
 std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray ray) {
-    std::shared_ptr<Surface> intersectedSurface = this->findIntersectedSurface(scene, ray);
+    auto [intersectedBlackHole, tBlackHole] = this->findIntersectedBlackHole(scene, ray);
 
-    if (intersectedSurface != nullptr)
-        return intersectedSurface->getColor();
-    else
-        return ColorFactory::generateBlack();
+    if (intersectedBlackHole != nullptr) {
+        // return intersectedBlackHole->getColor();
+        return this->calculateSpherePixelColor(intersectedBlackHole, ray, tBlackHole) ? ColorFactory::generateRed() : ColorFactory::generateBlack();
+    }
+
+    auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);
+
+    if (intersectedStar != nullptr) {
+        // return intersectedStar->getColor();
+        return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
+    }
+
+    return nullptr;
 }
 
-std::shared_ptr<Surface> RayTracingRenderer::findIntersectedSurface(Scene scene, Ray ray) {
-    std::shared_ptr<Surface> intersectedSurface = nullptr;
+bool RayTracingRenderer::calculateSpherePixelColor(std::shared_ptr<Sphere> sphere, Ray ray, double t) {
+    Eigen::Vector4d intersectionPoint = ray.getOriginPoint() + (ray.getDirection()*t);
+    Eigen::Vector2d uv = sphere->calculateUVMapping(intersectionPoint);
+    return ((int)(10*uv.x()) % 2 == (int)(10*uv.y()) % 2);
+}
+
+std::pair<std::shared_ptr<Sphere>, double> RayTracingRenderer::findIntersectedBlackHole(Scene scene, Ray ray) {
+    std::shared_ptr<Sphere> intersectedBlackHole = nullptr;
     double intersectionTime = -1;
 
     double t;
 
-    for (std::shared_ptr<Surface> surface : scene.getSurfaces()) {
-        t = surface->calculateIntersectionTime(ray);
+    for (std::shared_ptr<Sphere> black_hole : scene.getBlackHoles()) {
+        t = black_hole->calculateIntersectionTime(ray);
 
-        if (t < 0)
+        if (t < 0) {
             continue;
+        }
 
-        if (intersectedSurface == nullptr || t < intersectionTime) {
-            intersectedSurface = surface;
+        if (intersectedBlackHole == nullptr || t < intersectionTime) {
+            intersectedBlackHole = black_hole;
             intersectionTime = t;
         }
     }
 
-    return intersectedSurface;
+    return std::make_pair(intersectedBlackHole, intersectionTime);
+}
+
+std::pair<std::shared_ptr<Sphere>, double> RayTracingRenderer::findIntersectedStar(Scene scene, Ray ray) {
+    std::shared_ptr<Sphere> intersectedStar = nullptr;
+    double intersectionTime = -1;
+
+    double t;
+
+    for (std::shared_ptr<Sphere> star : scene.getStars()) {
+        t = star->calculateIntersectionTime(ray);
+
+        if (t < 0)
+            continue;
+
+        if (intersectedStar == nullptr || t < intersectionTime) {
+            intersectedStar = star;
+            intersectionTime = t;
+        }
+    }
+
+    return std::make_pair(intersectedStar, intersectionTime);
 }

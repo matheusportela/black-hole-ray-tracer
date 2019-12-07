@@ -18,6 +18,7 @@ class Sphere : public Surface {
     double getRadius();
     void setCenterPoint(Eigen::Vector4d centerPoint);
     Eigen::Vector4d getCenterPoint();
+    Eigen::Vector2d calculateUVMapping(Eigen::Vector4d intersectionPoint);
 
     std::string getType();
     double calculateIntersectionTime(Ray ray);

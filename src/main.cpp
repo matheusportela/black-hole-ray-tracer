@@ -1,6 +1,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION  // Do not include this line twice in your project!
 
 #include <memory>
+#include <random>
 
 #include <Eigen/Core>
 
@@ -21,20 +22,39 @@ std::shared_ptr<Renderer> createRenderer1(int width, int height);
 void task1();
 
 int main() {
-    // LOG_SET_DEBUG();
+    LOG_SET_DEBUG();
     task1();
     return 0;
 }
 
 Scene createScene1() {
-    Scene scene("Scene 1");
+    std::random_device r;
+    std::default_random_engine generator {0};
+    std::uniform_real_distribution<float> radius_distribution(0.005, 0.05);
+    std::uniform_real_distribution<float> x_distribution(-1.0,1.0);
+    std::uniform_real_distribution<float> y_distribution(-1.0,1.0);
+    std::uniform_real_distribution<float> z_distribution(1.0, 5.0);
 
-    scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
-    scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
-    scene.addSphere(0.15, Eigen::Vector4d(-0.7, 0.65, 0, 1));
-    scene.addSphere(0.4, Eigen::Vector4d(0.65, -0.75, 5, 1));
-    scene.addSphere(0.5, Eigen::Vector4d(0, 0, 5, 1));
-    scene.addSphere(0.2, Eigen::Vector4d(0.75, 0.75, 4, 1));
+    Scene scene("Scene 1");
+    float radius;
+    float x, y, z;
+
+    for (int i = 0; i < 100; i++) {
+        radius = radius_distribution(generator);
+        x = x_distribution(generator);
+        y = y_distribution(generator);
+        z = z_distribution(generator);
+        scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    }
+
+    scene.addBlackHole(0.5, Eigen::Vector4d(0, 0, 0, 1));
+
+    // scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
+    // scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
+    // scene.addSphere(0.15, Eigen::Vector4d(-0.7, 0.65, 0, 1));
+    // scene.addSphere(0.4, Eigen::Vector4d(0.65, -0.75, 5, 1));
+    // scene.addSphere(0.5, Eigen::Vector4d(0, 0, 5, 1));
+    // scene.addSphere(0.2, Eigen::Vector4d(0.75, 0.75, 4, 1));
 
     return scene;
 }

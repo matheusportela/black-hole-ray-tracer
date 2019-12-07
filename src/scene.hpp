@@ -19,6 +19,11 @@ class Scene {
 
     std::string getName();
     std::vector<std::shared_ptr<Surface>> getSurfaces();
+    std::vector<std::shared_ptr<Sphere>> getStars();
+    std::vector<std::shared_ptr<Sphere>> getBlackHoles();
+
+    void addStar(double radius, Eigen::Vector4d positionPoint);
+    void addBlackHole(double radius, Eigen::Vector4d positionPoint);
 
     void addSphere(double radius, Eigen::Vector4d positionPoint);
     void addSphere(double radius, Eigen::Vector4d positionPoint, std::shared_ptr<Color> color);
@@ -30,6 +35,9 @@ class Scene {
     std::string name;
 
     std::vector<std::shared_ptr<Surface>> surfaces;
+
+    std::vector<std::shared_ptr<Sphere>> stars;
+    std::vector<std::shared_ptr<Sphere>> black_holes;
 };
 
 #endif // SCENE_HPP

@@ -8,6 +8,26 @@ std::string Scene::getName() {
     return this->name;
 }
 
+void Scene::addBlackHole(double radius, Eigen::Vector4d positionPoint) {
+    LOG_D("Adding black hole");
+    LOG_D("Radius: " << radius);
+    LOG_D("Position:\n" << positionPoint);
+
+    std::shared_ptr<Sphere> black_hole = std::make_shared<Sphere>(radius, positionPoint);
+    black_hole->setColor(ColorFactory::generateBlack());
+    this->black_holes.push_back(black_hole);
+}
+
+void Scene::addStar(double radius, Eigen::Vector4d positionPoint) {
+    LOG_D("Adding star");
+    LOG_D("Radius: " << radius);
+    LOG_D("Position:\n" << positionPoint);
+
+    std::shared_ptr<Sphere> star = std::make_shared<Sphere>(radius, positionPoint);
+    star->setColor(ColorFactory::generateWhite());
+    this->stars.push_back(star);
+}
+
 void Scene::addSphere(double radius, Eigen::Vector4d positionPoint) {
     this->addSphere(radius, positionPoint, ColorFactory::generateWhite());
 }
@@ -53,4 +73,12 @@ void Scene::addSurface(std::shared_ptr<Surface> surface) {
 
 std::vector<std::shared_ptr<Surface>> Scene::getSurfaces() {
     return this->surfaces;
+}
+
+std::vector<std::shared_ptr<Sphere>> Scene::getStars() {
+    return this->stars;
+}
+
+std::vector<std::shared_ptr<Sphere>> Scene::getBlackHoles() {
+    return this->black_holes;
 }
