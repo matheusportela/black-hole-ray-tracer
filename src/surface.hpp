@@ -8,13 +8,14 @@
 
 #include "color.hpp"
 #include "color_factory.hpp"
+#include "ray.hpp"
 
 class Surface {
   public:
     Surface();
 
     virtual std::string getType() = 0;
-    virtual double calculateIntersectionTime(Eigen::Vector4d rayOrigin, Eigen::Vector4d rayDirection) = 0;
+    virtual double calculateIntersectionTime(Ray ray) = 0;
     virtual Eigen::Vector4d calculateIntersectionNormal(Eigen::Vector4d intersectionPoint) = 0;
 
     void setColor(std::shared_ptr<Color> color);

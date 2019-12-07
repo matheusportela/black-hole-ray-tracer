@@ -18,6 +18,7 @@
 #include "image.hpp"
 #include "log.hpp"
 #include "projection.hpp"
+#include "ray.hpp"
 #include "renderer.hpp"
 #include "scene.hpp"
 #include "viewport.hpp"
@@ -31,8 +32,9 @@ class RayTracingRenderer : public Renderer {
   private:
     std::string formatFrameName(std::string prefix, int frameNumber);
 
-    std::pair<std::shared_ptr<Color>, double> calculatePixelColor(Scene scene, Eigen::Vector4d rayOriginPoint, Eigen::Vector4d rayDirection, int iterations = 2);
-    std::shared_ptr<Surface> calculateIntersectedSurface(Scene scene, Eigen::Vector4d rayOriginPoint, Eigen::Vector4d rayDirection);
+    Ray generateRay(int x, int y, ProjectionType projectionType);
+    std::shared_ptr<Color> calculatePixelColor(Scene scene, Ray ray);
+    std::shared_ptr<Surface> findIntersectedSurface(Scene scene, Ray ray);
 
     std::shared_ptr<Viewport> viewport;
     std::shared_ptr<Projection> projection;

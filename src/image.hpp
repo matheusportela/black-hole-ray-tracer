@@ -16,7 +16,7 @@ class Image {
   public:
     Image(int width, int height);
 
-    void setPixel(int row, int col, double brightness, std::shared_ptr<Color> color);
+    void setPixel(int row, int col, std::shared_ptr<Color> color);
 
     void save(std::string filename);
 

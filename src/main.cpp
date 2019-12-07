@@ -22,9 +22,7 @@ void task1();
 
 int main() {
     // LOG_SET_DEBUG();
-
     task1();
-
     return 0;
 }
 

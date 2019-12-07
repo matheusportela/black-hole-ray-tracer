@@ -22,10 +22,10 @@ std::string Sphere::getType() {
     return std::string("sphere");
 }
 
-double Sphere::calculateIntersectionTime(Eigen::Vector4d rayOrigin, Eigen::Vector4d rayDirection) {
+double Sphere::calculateIntersectionTime(Ray ray) {
     Eigen::Vector3d c = this->centerPoint.head<3>();
-    Eigen::Vector3d e = rayOrigin.head<3>();
-    Eigen::Vector3d d = rayDirection.head<3>();
+    Eigen::Vector3d e = ray.getOriginPoint().head<3>();
+    Eigen::Vector3d d = ray.getDirection().head<3>();
 
     double delta = pow(d.dot(e - c), 2) - (d.dot(d))*((e - c).dot(e - c) - pow(this->radius, 2));
 

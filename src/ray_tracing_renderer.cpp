@@ -24,19 +24,25 @@ std::string RayTracingRenderer::formatFrameName(std::string prefix, int frameNum
 }
 
 Image RayTracingRenderer::render(Scene scene, ProjectionType projectionType) {
-    std::string projectionName;
-
-    if (projectionType == OrthographicProjection) {
-        projectionName = "orthographic";
-    } else if (projectionType == PerspectiveProjection) {
-        projectionName = "perspective";
-    }
-
+    std::string projectionName = (projectionType == OrthographicProjection) ? "orthographic" : "perspective";
     LOG_I("Rendering scene \"" << scene.getName() << "\" with " << projectionName << " projection");
 
+    Image image(this->viewport->getWidth(), this->viewport->getHeight());
+
+    tbb::parallel_for(0, this->viewport->getWidth(), [&](int x) {
+        tbb::parallel_for(0, this->viewport->getHeight(), [&](int y) {
+            auto ray = this->generateRay(x, y, projectionType);
+            auto pixel = this->calculatePixelColor(scene, ray);
+            image.setPixel(x, y, pixel);
+        });
+    });
+
+    return image;
+}
+
+Ray RayTracingRenderer::generateRay(int x, int y, ProjectionType projectionType) {
     int width = this->viewport->getWidth();
     int height = this->viewport->getHeight();
-    Image image(width, height);
 
     Eigen::Vector3d uc = this->camera->getUDirection().head<3>();
     Eigen::Vector3d vc = this->camera->getVDirection().head<3>();
@@ -51,62 +57,50 @@ Image RayTracingRenderer::render(Scene scene, ProjectionType projectionType) {
     // Fixed focal point at 1 distance of camera origin
     double d = 1;
 
-    tbb::parallel_for(0, width, [&](int x) {
-        tbb::parallel_for(0, height, [&](int y) {
-            // Calculate u and v coordinates
-            double u = l + (r - l)*(x + 0.5)/width;
-            double v = b + (t - b)*(y + 0.5)/height;
+    double u = l + (r - l)*(x + 0.5)/width;
+    double v = b + (t - b)*(y + 0.5)/height;
 
-            Eigen::Vector4d rayOriginPoint;
-            Eigen::Vector4d rayDirection;
-            Eigen::Vector3d vector3;
+    Eigen::Vector4d rayOriginPoint;
+    Eigen::Vector4d rayDirection;
+    Eigen::Vector3d vector3;
 
-            if (projectionType == OrthographicProjection) {
-                vector3 = ec + u*uc + v*vc;
-                rayOriginPoint = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 1);
-                rayDirection = this->camera->getGazeDirection();
-            } else if (projectionType == PerspectiveProjection) {
-                rayOriginPoint = this->camera->getPositionPoint() - d*this->camera->getGazeDirection();
-                vector3 = u*uc + v*vc - d*wc;
-                rayDirection = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 0);
-            }
-
-            auto pixel = this->calculatePixelColor(scene, rayOriginPoint, rayDirection);
-            image.setPixel(x, y, pixel.second, pixel.first);
-        });
-    });
-
-    return image;
-}
-
-std::pair<std::shared_ptr<Color>, double> RayTracingRenderer::calculatePixelColor(Scene scene, Eigen::Vector4d rayOriginPoint, Eigen::Vector4d rayDirection, int iterations) {
-    std::shared_ptr<Color> color = ColorFactory::generateBlack();
-
-    std::shared_ptr<Surface> intersectedSurface = this->calculateIntersectedSurface(scene, rayOriginPoint, rayDirection);
-
-    if (intersectedSurface != nullptr) {
-        color->setRed(intersectedSurface->getColor()->getRed());
-        color->setGreen(intersectedSurface->getColor()->getGreen());
-        color->setBlue(intersectedSurface->getColor()->getBlue());
+    if (projectionType == OrthographicProjection) {
+        vector3 = ec + u*uc + v*vc;
+        rayOriginPoint = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 1);
+        rayDirection = this->camera->getGazeDirection();
+    } else if (projectionType == PerspectiveProjection) {
+        rayOriginPoint = this->camera->getPositionPoint() - d*this->camera->getGazeDirection();
+        vector3 = u*uc + v*vc - d*wc;
+        rayDirection = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 0);
     }
 
-    return std::make_pair(color, 1.0);
+    return Ray(rayOriginPoint, rayDirection);
 }
 
-std::shared_ptr<Surface> RayTracingRenderer::calculateIntersectedSurface(Scene scene, Eigen::Vector4d rayOriginPoint, Eigen::Vector4d rayDirection) {
+std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray ray) {
+    std::shared_ptr<Surface> intersectedSurface = this->findIntersectedSurface(scene, ray);
+
+    if (intersectedSurface != nullptr)
+        return intersectedSurface->getColor();
+    else
+        return ColorFactory::generateBlack();
+}
+
+std::shared_ptr<Surface> RayTracingRenderer::findIntersectedSurface(Scene scene, Ray ray) {
     std::shared_ptr<Surface> intersectedSurface = nullptr;
     double intersectionTime = -1;
 
     double t;
 
     for (std::shared_ptr<Surface> surface : scene.getSurfaces()) {
-        t = surface->calculateIntersectionTime(rayOriginPoint, rayDirection);
+        t = surface->calculateIntersectionTime(ray);
 
-        if (t >= 0) {
-            if (intersectedSurface == nullptr || t < intersectionTime) {
-                intersectedSurface = surface;
-                intersectionTime = t;
-            }
+        if (t < 0)
+            continue;
+
+        if (intersectedSurface == nullptr || t < intersectionTime) {
+            intersectedSurface = surface;
+            intersectionTime = t;
         }
     }
 

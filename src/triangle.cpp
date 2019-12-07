@@ -6,7 +6,10 @@ std::string Triangle::getType() {
     return "triangle";
 }
 
-double Triangle::calculateIntersectionTime(Eigen::Vector4d rayOrigin, Eigen::Vector4d rayDirection) {
+double Triangle::calculateIntersectionTime(Ray ray) {
+    auto rayDirection = ray.getDirection();
+    auto rayOriginPoint = ray.getOriginPoint();
+
     double ax = this->p1(0);
     double ay = this->p1(1);
     double az = this->p1(2);
@@ -19,9 +22,9 @@ double Triangle::calculateIntersectionTime(Eigen::Vector4d rayOrigin, Eigen::Vec
     double dx = rayDirection(0);
     double dy = rayDirection(1);
     double dz = rayDirection(2);
-    double ex = rayOrigin(0);
-    double ey = rayOrigin(1);
-    double ez = rayOrigin(2);
+    double ex = rayOriginPoint(0);
+    double ey = rayOriginPoint(1);
+    double ez = rayOriginPoint(2);
 
 
     double a = ax - bx;

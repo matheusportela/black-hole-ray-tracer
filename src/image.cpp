@@ -7,10 +7,10 @@ Image::Image(int width, int height) {
     this->alpha_channel = Eigen::MatrixXd::Ones(height, width);
 }
 
-void Image::setPixel(int row, int col, double brightness, std::shared_ptr<Color> color) {
-    this->red_channel(row, col) = brightness*color->getRed();
-    this->green_channel(row, col) = brightness*color->getGreen();
-    this->blue_channel(row, col) = brightness*color->getBlue();
+void Image::setPixel(int row, int col, std::shared_ptr<Color> color) {
+    this->red_channel(row, col) = color->getRed();
+    this->green_channel(row, col) = color->getGreen();
+    this->blue_channel(row, col) = color->getBlue();
 }
 
 void Image::save(std::string filename) {

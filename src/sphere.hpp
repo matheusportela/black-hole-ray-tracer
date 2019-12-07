@@ -8,6 +8,7 @@
 #include <Eigen/Core>
 
 #include "surface.hpp"
+#include "ray.hpp"
 
 class Sphere : public Surface {
   public:
@@ -19,7 +20,7 @@ class Sphere : public Surface {
     Eigen::Vector4d getCenterPoint();
 
     std::string getType();
-    double calculateIntersectionTime(Eigen::Vector4d rayOrigin, Eigen::Vector4d rayDirection);
+    double calculateIntersectionTime(Ray ray);
     Eigen::Vector4d calculateIntersectionNormal(Eigen::Vector4d intersectionPoint);
 
   private:
