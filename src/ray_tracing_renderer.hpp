@@ -30,6 +30,11 @@ class RayTracingRenderer : public Renderer {
     Image render(Scene scene, ProjectionType projectionType);
 
   private:
+    void updateCamera(double step);
+    double cameraRadius {2};
+    double cameraXZAngle {M_PI_2};
+    double cameraAngularVelocity {M_PI/5};
+
     std::string formatFrameName(std::string prefix, int frameNumber);
 
     Ray generateRay(int x, int y, ProjectionType projectionType);

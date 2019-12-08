@@ -6,23 +6,30 @@ RayTracingRenderer::RayTracingRenderer(std::shared_ptr<Viewport> viewport, std::
 void RayTracingRenderer::animate(Scene scene, double duration, double step, std::string prefix, ProjectionType projectionType) {
     LOG_I("Animating scene \"" << scene.getName() << "\" for " << std::to_string(duration) << " seconds with steps of " << std::to_string(step) << " seconds");
 
+    Eigen::Vector4d cameraPositionPoint(cameraRadius*cos(cameraXZAngle), 0, cameraRadius*sin(cameraXZAngle), 1);
+    Eigen::Vector4d cameraGazeDirection(-cos(cameraXZAngle), 0, -sin(cameraXZAngle), 0);
+    Eigen::Vector4d cameraViewUpDirection(0, -1, 0, 0);
+    this->camera = std::make_shared<Camera>(cameraPositionPoint, cameraGazeDirection, cameraViewUpDirection);
+
     int frameNumber = 0;
     for (double t = 0; t < duration; t += step, frameNumber++) {
         Image frame = this->render(scene, projectionType);
         frame.save(this->formatFrameName(prefix, frameNumber) + ".png");
 
-        double omega = 10*M_PI/180;
-        Eigen::Matrix4d transformation;
-        transformation <<
-            0, -omega, 0, 0,
-            omega, 0, -omega, 0,
-            0, omega, 0, 0,
-            0, 0, 0, 1;
-
         // Update positions
-        this->camera->setPositionPoint(this->camera->getPositionPoint() + step*this->camera->getVelocityVector());
-        // this->camera->setPositionPoint(transformation*this->camera->getPositionPoint());
+        // this->camera->setPositionPoint(this->camera->getPositionPoint() + step*this->camera->getVelocityVector());
+        this->updateCamera(step);
     }
+}
+
+void RayTracingRenderer::updateCamera(double step) {
+    cameraXZAngle += cameraAngularVelocity*step;
+    cameraXZAngle = cameraXZAngle > M_PI ? cameraXZAngle - 2*M_PI : cameraXZAngle;
+
+    Eigen::Vector4d cameraPositionPoint(cameraRadius*cos(cameraXZAngle), 0, cameraRadius*sin(cameraXZAngle), 1);
+    Eigen::Vector4d cameraGazeDirection(-cos(cameraXZAngle), 0, -sin(cameraXZAngle), 0);
+    Eigen::Vector4d cameraViewUpDirection(0, -1, 0, 0);
+    this->camera = std::make_shared<Camera>(cameraPositionPoint, cameraGazeDirection, cameraViewUpDirection);
 }
 
 std::string RayTracingRenderer::formatFrameName(std::string prefix, int frameNumber) {
@@ -131,8 +138,8 @@ std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray 
         auto [intersectedBlackHole, tBlackHole] = this->findIntersectedBlackHole(scene, ray);
 
         if (intersectedBlackHole != nullptr) {
-            // return intersectedBlackHole->getColor();
-            return this->calculateSpherePixelColor(intersectedBlackHole, ray, tBlackHole) ? ColorFactory::generateRed() : ColorFactory::generateBlack();
+            // return this->calculateSpherePixelColor(intersectedBlackHole, ray, tBlackHole) ? ColorFactory::generateRed() : ColorFactory::generateBlack();
+            return ColorFactory::generateBlack();
         }
 
         auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);

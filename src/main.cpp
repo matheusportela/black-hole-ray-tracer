@@ -74,7 +74,7 @@ std::shared_ptr<Renderer> createRenderer1(int width, int height) {
 
     std::shared_ptr<Projection> projection = std::make_shared<OrthographicProjection>(-1, 1, -1, 1, -1, 1);
 
-    Eigen::Vector4d cameraPositionPoint(1, 0, 0, 1);
+    Eigen::Vector4d cameraPositionPoint(0, 0, 0, 1);
     Eigen::Vector4d cameraGazeDirection(0, 0, 1, 0);
     Eigen::Vector4d cameraViewUpDirection(0, -1, 0, 0);
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(cameraPositionPoint, cameraGazeDirection, cameraViewUpDirection);
@@ -89,7 +89,7 @@ std::shared_ptr<Renderer> createRenderer1(int width, int height) {
 void task1() {
     Scene scene = createScene1();
     LOG_I("Running task 1");
-    std::shared_ptr<Renderer> renderer = createRenderer1(100, 100);
+    std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
     Image image = renderer->render(scene, Renderer::PerspectiveProjection);
     image.save("task1.png");
 }
@@ -98,5 +98,5 @@ void task2() {
     Scene scene = createScene1();
     LOG_I("Running task 2");
     std::shared_ptr<Renderer> renderer = createRenderer1(100, 100);
-    renderer->animate(scene, 20, 1, "task2", Renderer::PerspectiveProjection);
+    renderer->animate(scene, 20, 0.5, "task2", Renderer::PerspectiveProjection);
 }
