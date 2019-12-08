@@ -26,14 +26,14 @@
 class RayTracingRenderer : public Renderer {
   public:
     RayTracingRenderer(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection, std::shared_ptr<Camera> camera);
-    void animate(Scene scene, double duration, double step, std::string prefix);
+    void animate(Scene scene, double duration, double step, std::string prefix, ProjectionType projectionType);
     Image render(Scene scene, ProjectionType projectionType);
 
   private:
     std::string formatFrameName(std::string prefix, int frameNumber);
 
     Ray generateRay(int x, int y, ProjectionType projectionType);
-    Ray updateRay(Ray ray);
+    Ray updateRay(Scene scene, Ray ray);
 
     std::shared_ptr<Color> calculatePixelColor(Scene scene, Ray ray);
     bool calculateSpherePixelColor(std::shared_ptr<Sphere> sphere, Ray ray, double t);

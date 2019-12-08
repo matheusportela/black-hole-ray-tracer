@@ -9,6 +9,7 @@
 class Camera {
   public:
     Camera(Eigen::Vector4d positionPoint, Eigen::Vector4d gazeDirection, Eigen::Vector4d viewUpDirection);
+    void setTransformation(Eigen::Matrix4d transformation);
     Eigen::Matrix4d getTransformation();
     Eigen::Vector4d getUDirection();
     Eigen::Vector4d getVDirection();
@@ -17,11 +18,11 @@ class Camera {
     void setPositionPoint(Eigen::Vector4d positionPoint);
     Eigen::Vector4d getVelocityVector();
     void setVelocityVector(Eigen::Vector4d velocityVector);
-    Eigen::Vector4d getGazeDirection();
-    Eigen::Vector4d getViewUpDirection();
+    // Eigen::Vector4d getGazeDirection();
+    // Eigen::Vector4d getViewUpDirection();
 
   private:
-    void generateTransformation();
+    void generateTransformation(Eigen::Vector4d positionPoint, Eigen::Vector4d gazeDirection, Eigen::Vector4d viewUpDirection);
 
     // Camera model
     Eigen::Matrix4d transformation;
@@ -30,8 +31,8 @@ class Camera {
     Eigen::Vector4d w;
     Eigen::Vector4d positionPoint;
     Eigen::Vector4d velocityVector;
-    Eigen::Vector4d gazeDirection;
-    Eigen::Vector4d viewUpDirection;
+    // Eigen::Vector4d gazeDirection;
+    // Eigen::Vector4d viewUpDirection;
 };
 
 #endif // CAMERA_HPP

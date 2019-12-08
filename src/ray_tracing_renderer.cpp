@@ -3,16 +3,25 @@
 RayTracingRenderer::RayTracingRenderer(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection, std::shared_ptr<Camera> camera) : viewport(viewport), projection(projection), camera(camera) {
 }
 
-void RayTracingRenderer::animate(Scene scene, double duration, double step, std::string prefix) {
+void RayTracingRenderer::animate(Scene scene, double duration, double step, std::string prefix, ProjectionType projectionType) {
     LOG_I("Animating scene \"" << scene.getName() << "\" for " << std::to_string(duration) << " seconds with steps of " << std::to_string(step) << " seconds");
 
     int frameNumber = 0;
     for (double t = 0; t < duration; t += step, frameNumber++) {
-        Image frame = this->render(scene, PerspectiveProjection);
+        Image frame = this->render(scene, projectionType);
         frame.save(this->formatFrameName(prefix, frameNumber) + ".png");
+
+        double omega = 10*M_PI/180;
+        Eigen::Matrix4d transformation;
+        transformation <<
+            0, -omega, 0, 0,
+            omega, 0, -omega, 0,
+            0, omega, 0, 0,
+            0, 0, 0, 1;
 
         // Update positions
         this->camera->setPositionPoint(this->camera->getPositionPoint() + step*this->camera->getVelocityVector());
+        // this->camera->setPositionPoint(transformation*this->camera->getPositionPoint());
     }
 }
 
@@ -78,13 +87,14 @@ Ray RayTracingRenderer::generateRay(int x, int y, ProjectionType projectionType)
     Eigen::Vector4d rayPosition;
     Eigen::Vector4d rayDirection;
     Eigen::Vector3d vector3;
+    Eigen::Vector4d cameraGazeDirection = this->camera->getTransformation()*Eigen::Vector4d(0, 0, -1, 0);
 
     if (projectionType == OrthographicProjection) {
         vector3 = ec + u*uc + v*vc;
         rayPosition = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 1);
-        rayDirection = this->camera->getGazeDirection();
+        rayDirection = cameraGazeDirection;
     } else if (projectionType == PerspectiveProjection) {
-        rayPosition = this->camera->getPositionPoint() - d*this->camera->getGazeDirection();
+        rayPosition = this->camera->getPositionPoint() - d*cameraGazeDirection;
         vector3 = u*uc + v*vc - d*wc;
         rayDirection = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 0);
     }
@@ -92,18 +102,24 @@ Ray RayTracingRenderer::generateRay(int x, int y, ProjectionType projectionType)
     return Ray(rayPosition, rayDirection, Eigen::Vector4d(0, 0, 0, 0));
 }
 
-Ray RayTracingRenderer::updateRay(Ray ray) {
+Ray RayTracingRenderer::updateRay(Scene scene, Ray ray) {
     Eigen::Vector4d position = ray.getPosition();
     Eigen::Vector4d velocity = ray.getVelocity();
     Eigen::Vector4d acceleration = ray.getAcceleration();
     double delta_t = this->timeStep;
 
-    // between 0 and -1.5
-    double power_coeff = -0.75;
-    // double power_coeff = -0;
-    double h2 = 1.0;
+    acceleration = Eigen::Vector4d(0, 0, 0, 0);
+    for (std::shared_ptr<Sphere> black_hole : scene.getBlackHoles()) {
+        // between 0 and -1.5
+        double power_coeff = -1.5;
+        // double h2 = 0.0125*black_hole->getRadius();
+        double h2 = 0.025*black_hole->getRadius();
+        Eigen::Vector4d p = (position - black_hole->getCenterPoint());
+        p[3] = 0;
+        // Eigen::Vector4d p(position.x(), position.y(), position.z(), 0);
+        acceleration += power_coeff*h2*p/pow(p.squaredNorm(), 2.5);
+    }
 
-    acceleration = power_coeff*h2*position/pow(position.squaredNorm(), 2.5);
     velocity += acceleration*delta_t;
     position += velocity*delta_t;
 
@@ -126,7 +142,7 @@ std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray 
             return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
         }
 
-        ray = this->updateRay(ray);
+        ray = this->updateRay(scene, ray);
     }
 
     return nullptr;

@@ -3,21 +3,17 @@
 Camera::Camera(Eigen::Vector4d positionPoint, Eigen::Vector4d gazeDirection, Eigen::Vector4d viewUpDirection) {
     LOG_D("Creating camera");
 
-    this->positionPoint = positionPoint;
-    this->gazeDirection = gazeDirection;
-    this->viewUpDirection = viewUpDirection;
-
-    this->generateTransformation();
+    this->generateTransformation(positionPoint, gazeDirection, viewUpDirection);
 
     LOG_D("Camera transformation\n" << this->transformation);
 }
 
-void Camera::generateTransformation() {
+void Camera::generateTransformation(Eigen::Vector4d positionPoint, Eigen::Vector4d gazeDirection, Eigen::Vector4d viewUpDirection) {
     Eigen::Vector3d u, v, w, e;
 
     // Calculate vector basis
-    w = -this->gazeDirection.head<3>().normalized();
-    u = this->viewUpDirection.head<3>().cross(w).normalized();
+    w = -gazeDirection.head<3>().normalized();
+    u = viewUpDirection.head<3>().cross(w).normalized();
     v = w.cross(u).normalized();
 
     e = this->positionPoint.head<3>();
@@ -38,6 +34,15 @@ void Camera::generateTransformation() {
     this->u << u, 0;
     this->v << v, 0;
     this->w << w, 0;
+    this->positionPoint = positionPoint;
+}
+
+void Camera::setTransformation(Eigen::Matrix4d transformation) {
+    this->transformation = transformation;
+    this->u << transformation.col(0);
+    this->v << transformation.col(1);
+    this->w << transformation.col(2);
+    this->positionPoint << transformation.col(3);
 }
 
 Eigen::Matrix4d Camera::getTransformation() {
@@ -62,7 +67,8 @@ Eigen::Vector4d Camera::getPositionPoint() {
 
 void Camera::setPositionPoint(Eigen::Vector4d positionPoint) {
     this->positionPoint = positionPoint;
-    this->generateTransformation();
+    // this->generateTransformation();
+    this->transformation.col(3) = positionPoint;
 }
 
 Eigen::Vector4d Camera::getVelocityVector() {
@@ -73,10 +79,10 @@ void Camera::setVelocityVector(Eigen::Vector4d velocityVector) {
     this->velocityVector = velocityVector;
 }
 
-Eigen::Vector4d Camera::getGazeDirection() {
-    return this->gazeDirection;
-}
+// Eigen::Vector4d Camera::getGazeDirection() {
+//     return this->gazeDirection;
+// }
 
-Eigen::Vector4d Camera::getViewUpDirection() {
-    return this->viewUpDirection;
-}
+// Eigen::Vector4d Camera::getViewUpDirection() {
+//     return this->viewUpDirection;
+// }

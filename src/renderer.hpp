@@ -11,7 +11,7 @@ class Renderer {
         PerspectiveProjection
     };
 
-    virtual void animate(Scene scene, double duration, double step, std::string prefix) = 0;
+    virtual void animate(Scene scene, double duration, double step, std::string prefix, ProjectionType projectionType) = 0;
     virtual Image render(Scene scene, ProjectionType projectionType) = 0;
 };
 
