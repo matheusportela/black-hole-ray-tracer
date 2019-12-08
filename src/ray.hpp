@@ -5,14 +5,17 @@
 
 class Ray {
   public:
-    Ray(Eigen::Vector4d origin_point, Eigen::Vector4d direction);
+    Ray(Eigen::Vector4d position, Eigen::Vector4d velocity, Eigen::Vector4d acceleration);
 
-    Eigen::Vector4d getOriginPoint();
+    Eigen::Vector4d getPosition();
+    Eigen::Vector4d getVelocity();
+    Eigen::Vector4d getAcceleration();
     Eigen::Vector4d getDirection();
 
   private:
-    Eigen::Vector4d origin_point;
-    Eigen::Vector4d direction;
+    Eigen::Vector4d position;
+    Eigen::Vector4d velocity;
+    Eigen::Vector4d acceleration;
 };
 
 #endif // RAY_HPP

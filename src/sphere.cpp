@@ -21,7 +21,7 @@ Eigen::Vector4d Sphere::getCenterPoint() {
 Eigen::Vector2d Sphere::calculateUVMapping(Eigen::Vector4d intersectionPoint) {
     // Reference: https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
     Eigen::Vector4d surfacePoint = intersectionPoint - this->getCenterPoint();
-    Eigen::Vector4d d = surfacePoint/surfacePoint.norm();
+    Eigen::Vector4d d = surfacePoint.normalized();
     double u = 0.5 + atan2(d.z(), d.x())/(2*M_PI);
     double v = 0.5 - asin(d.y())/M_PI;
     return Eigen::Vector2d(u, v);
@@ -33,7 +33,7 @@ std::string Sphere::getType() {
 
 double Sphere::calculateIntersectionTime(Ray ray) {
     Eigen::Vector3d c = this->centerPoint.head<3>();
-    Eigen::Vector3d e = ray.getOriginPoint().head<3>();
+    Eigen::Vector3d e = ray.getPosition().head<3>();
     Eigen::Vector3d d = ray.getDirection().head<3>();
 
     double delta = pow(d.dot(e - c), 2) - (d.dot(d))*((e - c).dot(e - c) - pow(this->radius, 2));

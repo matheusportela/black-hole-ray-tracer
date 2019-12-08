@@ -39,15 +39,23 @@ Scene createScene1() {
     float radius;
     float x, y, z;
 
-    for (int i = 0; i < 100; i++) {
-        radius = radius_distribution(generator);
-        x = x_distribution(generator);
-        y = y_distribution(generator);
-        z = z_distribution(generator);
-        scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    // for (int i = 0; i < 100; i++) {
+    //     radius = radius_distribution(generator);
+    //     x = x_distribution(generator);
+    //     y = y_distribution(generator);
+    //     z = z_distribution(generator);
+    //     scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    // }
+
+    for (double x = -1; x < 1; x += 0.4) {
+        for (double y = -1; y < 1; y += 0.4) {
+            scene.addStar(0.05, Eigen::Vector4d(x, y, 4, 1));
+        }
     }
 
-    scene.addBlackHole(0.5, Eigen::Vector4d(0, 0, 0, 1));
+    // scene.addStar(0.5, Eigen::Vector4d(-0.5, 0, 4, 1));
+
+    scene.addBlackHole(0.70, Eigen::Vector4d(0, 0, 0, 1));
 
     // scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
     // scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
@@ -64,7 +72,7 @@ std::shared_ptr<Renderer> createRenderer1(int width, int height) {
 
     std::shared_ptr<Projection> projection = std::make_shared<OrthographicProjection>(-1, 1, -1, 1, -1, 1);
 
-    Eigen::Vector4d cameraPositionPoint(0, 0, 0, 1);
+    Eigen::Vector4d cameraPositionPoint(0, 0, -2, 1);
     Eigen::Vector4d cameraGazeDirection(0, 0, 1, 0);
     Eigen::Vector4d cameraViewUpDirection(0, -1, 0, 0);
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(cameraPositionPoint, cameraGazeDirection, cameraViewUpDirection);
@@ -77,7 +85,7 @@ std::shared_ptr<Renderer> createRenderer1(int width, int height) {
 void task1() {
     Scene scene = createScene1();
     LOG_I("Running task 1");
-    std::shared_ptr<Renderer> renderer = createRenderer1(500, 500);
+    std::shared_ptr<Renderer> renderer = createRenderer1(100, 100);
     Image image = renderer->render(scene, Renderer::OrthographicProjection);
     image.save("task1.png");
 }

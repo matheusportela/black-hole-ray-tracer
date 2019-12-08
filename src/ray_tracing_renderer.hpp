@@ -33,6 +33,8 @@ class RayTracingRenderer : public Renderer {
     std::string formatFrameName(std::string prefix, int frameNumber);
 
     Ray generateRay(int x, int y, ProjectionType projectionType);
+    Ray updateRay(Ray ray);
+
     std::shared_ptr<Color> calculatePixelColor(Scene scene, Ray ray);
     bool calculateSpherePixelColor(std::shared_ptr<Sphere> sphere, Ray ray, double t);
     std::pair<std::shared_ptr<Sphere>, double> findIntersectedBlackHole(Scene scene, Ray ray);
@@ -41,6 +43,9 @@ class RayTracingRenderer : public Renderer {
     std::shared_ptr<Viewport> viewport;
     std::shared_ptr<Projection> projection;
     std::shared_ptr<Camera> camera;
+
+    double timeStep {0.1};
+    int numIterations {100};
 };
 
 #endif // RAY_TRACING_RENDERER_HPP

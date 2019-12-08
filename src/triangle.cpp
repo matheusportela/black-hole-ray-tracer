@@ -8,7 +8,7 @@ std::string Triangle::getType() {
 
 double Triangle::calculateIntersectionTime(Ray ray) {
     auto rayDirection = ray.getDirection();
-    auto rayOriginPoint = ray.getOriginPoint();
+    auto rayPosition = ray.getPosition();
 
     double ax = this->p1(0);
     double ay = this->p1(1);
@@ -22,9 +22,9 @@ double Triangle::calculateIntersectionTime(Ray ray) {
     double dx = rayDirection(0);
     double dy = rayDirection(1);
     double dz = rayDirection(2);
-    double ex = rayOriginPoint(0);
-    double ey = rayOriginPoint(1);
-    double ez = rayOriginPoint(2);
+    double ex = rayPosition(0);
+    double ey = rayPosition(1);
+    double ez = rayPosition(2);
 
 
     double a = ax - bx;

@@ -29,27 +29,28 @@ Image RayTracingRenderer::render(Scene scene, ProjectionType projectionType) {
 
     Image image(this->viewport->getWidth(), this->viewport->getHeight());
 
-    // tbb::parallel_for(0, this->viewport->getWidth(), [&](int x) {
-    //     tbb::parallel_for(0, this->viewport->getHeight(), [&](int y) {
-    for(int x = 0; x < this->viewport->getWidth(); x++) {
-        for(int y = 0; y < this->viewport->getHeight(); y++) {
+    tbb::parallel_for(0, this->viewport->getWidth(), [&](int x) {
+        tbb::parallel_for(0, this->viewport->getHeight(), [&](int y) {
+    // for(int x = 0; x < this->viewport->getWidth(); x++) {
+    //     for(int y = 0; y < this->viewport->getHeight(); y++) {
             // Render background
-            int stride = 50;
-            if ((x/stride) % 2 == (y/stride) % 2)  {
-                image.setPixel(x, y, ColorFactory::generateGray());
-            } else {
-                image.setPixel(x, y, ColorFactory::generateWhite());
-            }
+            // int stride = 50;
+            // if ((x/stride) % 2 == (y/stride) % 2)  {
+            //     image.setPixel(x, y, ColorFactory::generateGray());
+            // } else {
+            //     image.setPixel(x, y, ColorFactory::generateWhite());
+            // }
+            image.setPixel(x, y, ColorFactory::generateBlack());
 
             // Render surfaces
             auto ray = this->generateRay(x, y, projectionType);
             auto color = this->calculatePixelColor(scene, ray);
             if (color != nullptr)
                 image.setPixel(x, y, color);
-        };
-    };
-    //     });
-    // });
+    //     };
+    // };
+        });
+    });
 
     return image;
 }
@@ -74,43 +75,65 @@ Ray RayTracingRenderer::generateRay(int x, int y, ProjectionType projectionType)
     double u = l + (r - l)*(x + 0.5)/width;
     double v = b + (t - b)*(y + 0.5)/height;
 
-    Eigen::Vector4d rayOriginPoint;
+    Eigen::Vector4d rayPosition;
     Eigen::Vector4d rayDirection;
     Eigen::Vector3d vector3;
 
     if (projectionType == OrthographicProjection) {
         vector3 = ec + u*uc + v*vc;
-        rayOriginPoint = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 1);
+        rayPosition = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 1);
         rayDirection = this->camera->getGazeDirection();
     } else if (projectionType == PerspectiveProjection) {
-        rayOriginPoint = this->camera->getPositionPoint() - d*this->camera->getGazeDirection();
+        rayPosition = this->camera->getPositionPoint() - d*this->camera->getGazeDirection();
         vector3 = u*uc + v*vc - d*wc;
         rayDirection = Eigen::Vector4d(vector3(0), vector3(1), vector3(2), 0);
     }
 
-    return Ray(rayOriginPoint, rayDirection);
+    return Ray(rayPosition, rayDirection, Eigen::Vector4d(0, 0, 0, 0));
+}
+
+Ray RayTracingRenderer::updateRay(Ray ray) {
+    Eigen::Vector4d position = ray.getPosition();
+    Eigen::Vector4d velocity = ray.getVelocity();
+    Eigen::Vector4d acceleration = ray.getAcceleration();
+    double delta_t = this->timeStep;
+
+    // between 0 and -1.5
+    double power_coeff = -0.75;
+    // double power_coeff = -0;
+    double h2 = 1.0;
+
+    acceleration = power_coeff*h2*position/pow(position.squaredNorm(), 2.5);
+    velocity += acceleration*delta_t;
+    position += velocity*delta_t;
+
+    return Ray(position, velocity, acceleration);
 }
 
 std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray ray) {
-    auto [intersectedBlackHole, tBlackHole] = this->findIntersectedBlackHole(scene, ray);
+    for (int i = 0; i < this->numIterations; i++) {
+        auto [intersectedBlackHole, tBlackHole] = this->findIntersectedBlackHole(scene, ray);
 
-    if (intersectedBlackHole != nullptr) {
-        // return intersectedBlackHole->getColor();
-        return this->calculateSpherePixelColor(intersectedBlackHole, ray, tBlackHole) ? ColorFactory::generateRed() : ColorFactory::generateBlack();
-    }
+        if (intersectedBlackHole != nullptr) {
+            // return intersectedBlackHole->getColor();
+            return this->calculateSpherePixelColor(intersectedBlackHole, ray, tBlackHole) ? ColorFactory::generateRed() : ColorFactory::generateBlack();
+        }
 
-    auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);
+        auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);
 
-    if (intersectedStar != nullptr) {
-        // return intersectedStar->getColor();
-        return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
+        if (intersectedStar != nullptr) {
+            // return intersectedStar->getColor();
+            return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
+        }
+
+        ray = this->updateRay(ray);
     }
 
     return nullptr;
 }
 
 bool RayTracingRenderer::calculateSpherePixelColor(std::shared_ptr<Sphere> sphere, Ray ray, double t) {
-    Eigen::Vector4d intersectionPoint = ray.getOriginPoint() + (ray.getDirection()*t);
+    Eigen::Vector4d intersectionPoint = ray.getPosition() + (ray.getDirection()*t);
     Eigen::Vector2d uv = sphere->calculateUVMapping(intersectionPoint);
     return ((int)(10*uv.x()) % 2 == (int)(10*uv.y()) % 2);
 }
@@ -124,7 +147,7 @@ std::pair<std::shared_ptr<Sphere>, double> RayTracingRenderer::findIntersectedBl
     for (std::shared_ptr<Sphere> black_hole : scene.getBlackHoles()) {
         t = black_hole->calculateIntersectionTime(ray);
 
-        if (t < 0) {
+        if (t < 0 || t > this->timeStep) {
             continue;
         }
 
@@ -146,7 +169,7 @@ std::pair<std::shared_ptr<Sphere>, double> RayTracingRenderer::findIntersectedSt
     for (std::shared_ptr<Sphere> star : scene.getStars()) {
         t = star->calculateIntersectionTime(ray);
 
-        if (t < 0)
+        if (t < 0 || t > this->timeStep)
             continue;
 
         if (intersectedStar == nullptr || t < intersectionTime) {
