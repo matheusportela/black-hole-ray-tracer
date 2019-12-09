@@ -18,6 +18,26 @@ void Scene::addBlackHole(double radius, Eigen::Vector4d positionPoint) {
     this->black_holes.push_back(black_hole);
 }
 
+void Scene::addAccretionDisk(double innerRadius, double outerRadius, Eigen::Vector4d positionPoint, Eigen::Vector4d normal) {
+    LOG_D("Adding accretion disk");
+    LOG_D("Inner Radius: " << innerRadius);
+    LOG_D("Outer Radius: " << outerRadius);
+    LOG_D("Position:\n" << positionPoint);
+    LOG_D("Normal:\n" << normal);
+
+    auto color = ColorFactory::generateColor(255/256.0, 247/256.0, 103/256.0);
+
+    std::shared_ptr<Disk> top_accretion_disk = std::make_shared<Disk>(innerRadius, outerRadius, positionPoint, normal);
+    top_accretion_disk->setColor(color);
+    // top_accretion_disk->setColor(ColorFactory::generateRed());
+    this->accretion_disks.push_back(top_accretion_disk);
+
+    std::shared_ptr<Disk> bottom_accretion_disk = std::make_shared<Disk>(innerRadius, outerRadius, positionPoint, -normal);
+    top_accretion_disk->setColor(color);
+    // bottom_accretion_disk->setColor(ColorFactory::generateBlue());
+    this->accretion_disks.push_back(bottom_accretion_disk);
+}
+
 void Scene::addStar(double radius, Eigen::Vector4d positionPoint) {
     LOG_D("Adding star");
     LOG_D("Radius: " << radius);
@@ -81,4 +101,8 @@ std::vector<std::shared_ptr<Sphere>> Scene::getStars() {
 
 std::vector<std::shared_ptr<Sphere>> Scene::getBlackHoles() {
     return this->black_holes;
+}
+
+std::vector<std::shared_ptr<Disk>> Scene::getAccretionDisks() {
+    return this->accretion_disks;
 }

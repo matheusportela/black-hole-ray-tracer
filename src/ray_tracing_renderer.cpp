@@ -120,7 +120,7 @@ Ray RayTracingRenderer::updateRay(Scene scene, Ray ray) {
         // between 0 and -1.5
         double power_coeff = -1.5;
         // double h2 = 0.0125*black_hole->getRadius();
-        double h2 = 0.025*black_hole->getRadius();
+        double h2 = 0.2*black_hole->getRadius();
         Eigen::Vector4d p = (position - black_hole->getCenterPoint());
         p[3] = 0;
         // Eigen::Vector4d p(position.x(), position.y(), position.z(), 0);
@@ -142,11 +142,17 @@ std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray 
             return ColorFactory::generateBlack();
         }
 
+        auto [intersectedAccretionDisk, tAccretionDisk] = this->findIntersectedAccretionDisk(scene, ray);
+
+        if (intersectedAccretionDisk != nullptr) {
+            return intersectedAccretionDisk->getColor();
+        }
+
         auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);
 
         if (intersectedStar != nullptr) {
-            // return intersectedStar->getColor();
-            return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
+            return intersectedStar->getColor();
+            // return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
         }
 
         ray = this->updateRay(scene, ray);
@@ -202,4 +208,25 @@ std::pair<std::shared_ptr<Sphere>, double> RayTracingRenderer::findIntersectedSt
     }
 
     return std::make_pair(intersectedStar, intersectionTime);
+}
+
+std::pair<std::shared_ptr<Disk>, double> RayTracingRenderer::findIntersectedAccretionDisk(Scene scene, Ray ray) {
+    std::shared_ptr<Disk> intersectedAccretionDisk = nullptr;
+    double intersectionTime = -1;
+
+    double t;
+
+    for (std::shared_ptr<Disk> accretion_disk : scene.getAccretionDisks()) {
+        t = accretion_disk->calculateIntersectionTime(ray);
+
+        if (t < 0 || t > this->timeStep)
+            continue;
+
+        if (intersectedAccretionDisk == nullptr || t < intersectionTime) {
+            intersectedAccretionDisk = accretion_disk;
+            intersectionTime = t;
+        }
+    }
+
+    return std::make_pair(intersectedAccretionDisk, intersectionTime);
 }

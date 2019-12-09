@@ -44,6 +44,7 @@ class RayTracingRenderer : public Renderer {
     bool calculateSpherePixelColor(std::shared_ptr<Sphere> sphere, Ray ray, double t);
     std::pair<std::shared_ptr<Sphere>, double> findIntersectedBlackHole(Scene scene, Ray ray);
     std::pair<std::shared_ptr<Sphere>, double> findIntersectedStar(Scene scene, Ray ray);
+    std::pair<std::shared_ptr<Disk>, double> findIntersectedAccretionDisk(Scene scene, Ray ray);
 
     std::shared_ptr<Viewport> viewport;
     std::shared_ptr<Projection> projection;

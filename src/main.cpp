@@ -23,8 +23,8 @@ void task1();
 void task2();
 
 int main() {
-    LOG_SET_DEBUG();
-    task1();
+    // LOG_SET_DEBUG();
+    // task1();
     task2();
     return 0;
 }
@@ -33,9 +33,9 @@ Scene createScene1() {
     std::random_device r;
     std::default_random_engine generator {0};
     std::uniform_real_distribution<float> radius_distribution(0.005, 0.05);
-    std::uniform_real_distribution<float> x_distribution(-1.0,1.0);
-    std::uniform_real_distribution<float> y_distribution(-1.0,1.0);
-    std::uniform_real_distribution<float> z_distribution(1.0, 5.0);
+    std::uniform_real_distribution<float> x_distribution(-2.0,2.0);
+    std::uniform_real_distribution<float> y_distribution(-2.0,2.0);
+    std::uniform_real_distribution<float> z_distribution(2.0, 5.0);
 
     Scene scene("Scene 1");
     float radius;
@@ -49,15 +49,16 @@ Scene createScene1() {
     //     scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
     // }
 
-    for (double x = -1 + 0.4/2; x < 1; x += 0.4) {
-        for (double y = -1 + 0.4/2; y < 1; y += 0.4) {
-            scene.addStar(0.1, Eigen::Vector4d(x, y, 1, 1));
-        }
-    }
+    // for (double x = -1 + 0.4/2; x < 1; x += 0.4) {
+    //     for (double y = -1 + 0.4/2; y < 1; y += 0.4) {
+    //         scene.addStar(0.1, Eigen::Vector4d(x, y, 1, 1));
+    //     }
+    // }
 
     // scene.addStar(0.5, Eigen::Vector4d(-0.5, 0, 4, 1));
 
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
+    scene.addAccretionDisk(0.6, 0.4, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(0, -5, 1, 0).normalized());
 
     // scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
     // scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
@@ -98,5 +99,5 @@ void task2() {
     Scene scene = createScene1();
     LOG_I("Running task 2");
     std::shared_ptr<Renderer> renderer = createRenderer1(100, 100);
-    renderer->animate(scene, 20, 0.5, "task2", Renderer::PerspectiveProjection);
+    renderer->animate(scene, 10, 0.25, "task2", Renderer::PerspectiveProjection);
 }
