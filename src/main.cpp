@@ -34,12 +34,12 @@ void task6();
 
 int main() {
     // LOG_SET_DEBUG();
-    // task1();
+    task1();
     task2();
-    // task3();
-    // task4();
-    // task5();
-    // task6();
+    task3();
+    task4();
+    task5();
+    task6();
     return 0;
 }
 
