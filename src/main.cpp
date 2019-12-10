@@ -16,31 +16,35 @@
 #include "sphere.hpp"
 
 Scene createScene1();
+Scene createScene2();
 
 std::shared_ptr<Renderer> createRenderer1(int width, int height);
 
 void task1();
 void task2();
+void task3();
 
 int main() {
     // LOG_SET_DEBUG();
     // task1();
-    task2();
+    // task2();
+    task3();
     return 0;
 }
 
 Scene createScene1() {
     std::random_device r;
     std::default_random_engine generator {0};
-    std::uniform_real_distribution<float> radius_distribution(0.005, 0.05);
-    std::uniform_real_distribution<float> x_distribution(-2.0,2.0);
-    std::uniform_real_distribution<float> y_distribution(-2.0,2.0);
-    std::uniform_real_distribution<float> z_distribution(2.0, 5.0);
 
     Scene scene("Scene 1");
-    float radius;
-    float x, y, z;
 
+    // Creating stars distributed in a plane
+    // float radius;
+    // float x, y, z;
+    // std::uniform_real_distribution<float> radius_distribution(0.005, 0.05);
+    // std::uniform_real_distribution<float> x_distribution(-2.0,2.0);
+    // std::uniform_real_distribution<float> y_distribution(-2.0,2.0);
+    // std::uniform_real_distribution<float> z_distribution(2.0, 5.0);
     // for (int i = 0; i < 100; i++) {
     //     radius = radius_distribution(generator);
     //     x = x_distribution(generator);
@@ -49,6 +53,28 @@ Scene createScene1() {
     //     scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
     // }
 
+    // Creating stars distributed in a sphere
+    float radius;
+    float x, y, z;
+    float rho, theta, psi;
+    std::uniform_real_distribution<float> radius_distribution(0.005, 0.12);
+    std::uniform_real_distribution<float> rho_distribution(4.0, 9.0);
+    std::uniform_real_distribution<float> theta_distribution(-M_PI, M_PI);
+    std::uniform_real_distribution<float> psi_distribution(-M_PI/4, M_PI/4);
+    for (int i = 0; i < 100; i++) {
+        radius = radius_distribution(generator);
+        rho = rho_distribution(generator);
+        theta = theta_distribution(generator);
+        psi = psi_distribution(generator);
+
+        x = rho*sin(psi)*cos(theta);
+        y = rho*sin(psi)*sin(theta);
+        z = rho*cos(psi);
+
+        scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    }
+
+    // Creating stars equally distributed in a plane
     // for (double x = -1 + 0.4/2; x < 1; x += 0.4) {
     //     for (double y = -1 + 0.4/2; y < 1; y += 0.4) {
     //         scene.addStar(0.1, Eigen::Vector4d(x, y, 1, 1));
@@ -58,7 +84,7 @@ Scene createScene1() {
     // scene.addStar(0.5, Eigen::Vector4d(-0.5, 0, 4, 1));
 
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
-    scene.addAccretionDisk(0.6, 0.4, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(0, -5, 1, 0).normalized());
+    scene.addAccretionDisk(1.25, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(0, -5, 1, 0).normalized());
 
     // scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
     // scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
@@ -70,12 +96,45 @@ Scene createScene1() {
     return scene;
 }
 
+Scene createScene2() {
+    std::random_device r;
+    std::default_random_engine generator {0};
+
+    Scene scene("Scene 1");
+
+    // Creating stars distributed in a sphere
+    float radius;
+    float x, y, z;
+    float rho, theta, psi;
+    std::uniform_real_distribution<float> radius_distribution(0.005, 0.12);
+    std::uniform_real_distribution<float> rho_distribution(4.0, 9.0);
+    std::uniform_real_distribution<float> theta_distribution(-M_PI, M_PI);
+    std::uniform_real_distribution<float> psi_distribution(-M_PI/4, M_PI/4);
+    for (int i = 0; i < 100; i++) {
+        radius = radius_distribution(generator);
+        rho = rho_distribution(generator);
+        theta = theta_distribution(generator);
+        psi = psi_distribution(generator);
+
+        x = rho*sin(psi)*cos(theta);
+        y = rho*sin(psi)*sin(theta);
+        z = rho*cos(psi);
+
+        scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    }
+
+    scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
+    // scene.addAccretionDisk(1.25, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(0, -5, 1, 0).normalized());
+
+    return scene;
+}
+
 std::shared_ptr<Renderer> createRenderer1(int width, int height) {
     std::shared_ptr<Viewport> viewport = std::make_shared<Viewport>(width, height);
 
     std::shared_ptr<Projection> projection = std::make_shared<OrthographicProjection>(-1, 1, -1, 1, -1, 1);
 
-    Eigen::Vector4d cameraPositionPoint(0, 0, 0, 1);
+    Eigen::Vector4d cameraPositionPoint(0, 0, -2, 1);
     Eigen::Vector4d cameraGazeDirection(0, 0, 1, 0);
     Eigen::Vector4d cameraViewUpDirection(0, -1, 0, 0);
     std::shared_ptr<Camera> camera = std::make_shared<Camera>(cameraPositionPoint, cameraGazeDirection, cameraViewUpDirection);
@@ -98,6 +157,13 @@ void task1() {
 void task2() {
     Scene scene = createScene1();
     LOG_I("Running task 2");
-    std::shared_ptr<Renderer> renderer = createRenderer1(100, 100);
+    std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
     renderer->animate(scene, 10, 0.25, "task2", Renderer::PerspectiveProjection);
+}
+
+void task3() {
+    Scene scene = createScene2();
+    LOG_I("Running task 3");
+    std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
+    renderer->animate(scene, 10, 0.25, "task3", Renderer::PerspectiveProjection);
 }
