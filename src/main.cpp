@@ -17,8 +17,9 @@
 
 Scene createScene1(); // With accretion disk
 Scene createScene2(); // Without accretion disk
-Scene createScene3(); // Without accretion disk and no black hole distortion
-Scene createScene4(); // Without accretion disk and no black hole distortion
+Scene createScene3(); // With accretion disk but without black hole distortion
+Scene createScene4(); // Without accretion disk nor black hole distortion
+Scene createScene5(); // Without accretion disk but with black hole distortion
 
 std::shared_ptr<Renderer> createRenderer1(int width, int height);
 
@@ -27,14 +28,16 @@ void task2();
 void task3();
 void task4();
 void task5();
+void task6();
 
 int main() {
     // LOG_SET_DEBUG();
-    task1();
-    // task2();
-    // task3();
-    task4();
-    task5();
+    // task1();
+    task2();
+    task3();
+    // task4();
+    // task5();
+    // task6();
     return 0;
 }
 
@@ -163,6 +166,38 @@ Scene createScene4() {
     return scene;
 }
 
+Scene createScene5() {
+    std::random_device r;
+    std::default_random_engine generator {0};
+
+    Scene scene("Scene 4");
+
+    // Creating stars distributed in a sphere
+    float radius;
+    float x, y, z;
+    float rho, theta, psi;
+    std::uniform_real_distribution<float> radius_distribution(0.005, 0.12);
+    std::uniform_real_distribution<float> rho_distribution(4.0, 9.0);
+    std::uniform_real_distribution<float> theta_distribution(-M_PI, M_PI);
+    std::uniform_real_distribution<float> psi_distribution(-M_PI/4, M_PI/4);
+    for (int i = 0; i < 100; i++) {
+        radius = radius_distribution(generator);
+        rho = rho_distribution(generator);
+        theta = theta_distribution(generator);
+        psi = psi_distribution(generator);
+
+        x = rho*sin(psi)*cos(theta);
+        y = rho*sin(psi)*sin(theta);
+        z = rho*cos(psi);
+
+        scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
+    }
+
+    scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
+
+    return scene;
+}
+
 std::shared_ptr<Renderer> createRenderer1(int width, int height) {
     std::shared_ptr<Viewport> viewport = std::make_shared<Viewport>(width, height);
 
@@ -216,4 +251,12 @@ void task5() {
     std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
     Image image = renderer->render(scene, Renderer::PerspectiveProjection);
     image.save("task5.png");
+}
+
+void task6() {
+    Scene scene = createScene5();
+    LOG_I("Running task 6");
+    std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
+    Image image = renderer->render(scene, Renderer::PerspectiveProjection);
+    image.save("task6.png");
 }
