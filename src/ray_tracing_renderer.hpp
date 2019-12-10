@@ -50,7 +50,7 @@ class RayTracingRenderer : public Renderer {
     std::shared_ptr<Projection> projection;
     std::shared_ptr<Camera> camera;
 
-    double timeStep {0.1};
+    double timeStep {1};
     int numIterations {100};
 };
 

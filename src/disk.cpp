@@ -6,6 +6,8 @@ outerRadius(outerRadius), innerRadius(innerRadius), centerPoint(centerPoint), no
         LOG_E("Disk outer radius cannot be smaller than inner radius");
         exit(1);
     }
+
+    this->texture.load("../textures/adisk.jpg");
 }
 
 std::string Disk::getType() {
@@ -49,4 +51,26 @@ double Disk::calculateIntersectionTime(Ray ray) {
 
 Eigen::Vector4d Disk::calculateIntersectionNormal(Eigen::Vector4d intersectionPoint) {
     return this->normal;
+}
+
+Eigen::Vector2d Disk::calculateUVMapping(Eigen::Vector4d intersectionPoint) {
+    // Reference: https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
+    Eigen::Vector4d surfacePoint = intersectionPoint - this->centerPoint;
+    Eigen::Vector4d d = surfacePoint.normalized();
+
+    // Projecting d to the x-y plane
+    d[2] = 0;
+    d = d.normalized();
+
+    double u = (0.5 - acos(d.y())/(2*M_PI));
+    double v = (surfacePoint.norm() - this->innerRadius)/(this->outerRadius - this->innerRadius);
+    return Eigen::Vector2d(u, v);
+}
+
+std::shared_ptr<Color> Disk::getTextureColor(Eigen::Vector4d intersectionPoint) {
+    Eigen::Vector2d uv = this->calculateUVMapping(intersectionPoint);
+    LOG_D("UV:\n" << uv);
+    Eigen::Vector4d color = this->texture.at(uv[0], uv[1]);
+    LOG_D("Color:\n" << color);
+    return std::make_shared<Color>(color[0], color[1], color[2]);
 }

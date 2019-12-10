@@ -113,7 +113,7 @@ Ray RayTracingRenderer::updateRay(Scene scene, Ray ray) {
     Eigen::Vector4d position = ray.getPosition();
     Eigen::Vector4d velocity = ray.getVelocity();
     Eigen::Vector4d acceleration = ray.getAcceleration();
-    double delta_t = this->timeStep;
+    double delta_t = this->timeStep/10.0;
 
     acceleration = Eigen::Vector4d(0, 0, 0, 0);
     for (std::shared_ptr<Sphere> black_hole : scene.getBlackHoles()) {
@@ -145,7 +145,9 @@ std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray 
         auto [intersectedAccretionDisk, tAccretionDisk] = this->findIntersectedAccretionDisk(scene, ray);
 
         if (intersectedAccretionDisk != nullptr) {
-            return intersectedAccretionDisk->getColor();
+            // return intersectedAccretionDisk->getColor();
+            Eigen::Vector4d intersectionPoint = ray.getPosition() + (ray.getDirection()*tAccretionDisk);
+            return intersectedAccretionDisk->getTextureColor(intersectionPoint);
         }
 
         auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);

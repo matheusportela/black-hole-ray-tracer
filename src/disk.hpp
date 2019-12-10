@@ -7,6 +7,7 @@
 
 #include <Eigen/Core>
 
+#include "image.hpp"
 #include "log.hpp"
 #include "surface.hpp"
 #include "ray.hpp"
@@ -24,8 +25,11 @@ class Disk : public Surface {
     std::string getType();
     double calculateIntersectionTime(Ray ray);
     Eigen::Vector4d calculateIntersectionNormal(Eigen::Vector4d intersectionPoint);
+    Eigen::Vector2d calculateUVMapping(Eigen::Vector4d intersectionPoint);
+    std::shared_ptr<Color> getTextureColor(Eigen::Vector4d intersectionPoint);
 
   private:
+    Image texture;
     double outerRadius;
     double innerRadius;
     Eigen::Vector4d centerPoint;

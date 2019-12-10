@@ -1,4 +1,6 @@
-#define STB_IMAGE_WRITE_IMPLEMENTATION  // Do not include this line twice in your project!
+// Do not include this line twice in your project!
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <memory>
 #include <random>
@@ -32,9 +34,9 @@ void task6();
 
 int main() {
     // LOG_SET_DEBUG();
-    // task1();
-    task2();
-    task3();
+    task1();
+    // task2();
+    // task3();
     // task4();
     // task5();
     // task6();
@@ -69,7 +71,7 @@ Scene createScene1() {
     }
 
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
-    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -20, 1, 0).normalized());
+    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -10, 1, 0).normalized());
     return scene;
 }
 
@@ -132,7 +134,7 @@ Scene createScene3() {
         scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
     }
 
-    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -20, 1, 0).normalized());
+    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -10, 1, 0).normalized());
     return scene;
 }
 
