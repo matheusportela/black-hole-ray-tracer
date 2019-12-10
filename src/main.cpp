@@ -15,8 +15,8 @@
 #include "scene.hpp"
 #include "sphere.hpp"
 
-Scene createScene1();
-Scene createScene2();
+Scene createScene1(); // With accretion disk
+Scene createScene2(); // Without accretion disk
 
 std::shared_ptr<Renderer> createRenderer1(int width, int height);
 
@@ -26,9 +26,9 @@ void task3();
 
 int main() {
     // LOG_SET_DEBUG();
-    // task1();
+    task1();
     // task2();
-    task3();
+    // task3();
     return 0;
 }
 
@@ -37,21 +37,6 @@ Scene createScene1() {
     std::default_random_engine generator {0};
 
     Scene scene("Scene 1");
-
-    // Creating stars distributed in a plane
-    // float radius;
-    // float x, y, z;
-    // std::uniform_real_distribution<float> radius_distribution(0.005, 0.05);
-    // std::uniform_real_distribution<float> x_distribution(-2.0,2.0);
-    // std::uniform_real_distribution<float> y_distribution(-2.0,2.0);
-    // std::uniform_real_distribution<float> z_distribution(2.0, 5.0);
-    // for (int i = 0; i < 100; i++) {
-    //     radius = radius_distribution(generator);
-    //     x = x_distribution(generator);
-    //     y = y_distribution(generator);
-    //     z = z_distribution(generator);
-    //     scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
-    // }
 
     // Creating stars distributed in a sphere
     float radius;
@@ -74,25 +59,8 @@ Scene createScene1() {
         scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
     }
 
-    // Creating stars equally distributed in a plane
-    // for (double x = -1 + 0.4/2; x < 1; x += 0.4) {
-    //     for (double y = -1 + 0.4/2; y < 1; y += 0.4) {
-    //         scene.addStar(0.1, Eigen::Vector4d(x, y, 1, 1));
-    //     }
-    // }
-
-    // scene.addStar(0.5, Eigen::Vector4d(-0.5, 0, 4, 1));
-
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
     scene.addAccretionDisk(1.25, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(0, -5, 1, 0).normalized());
-
-    // scene.addSphere(0.25, Eigen::Vector4d(-0.65, -0.7, 1, 1));
-    // scene.addSphere(0.1, Eigen::Vector4d(-0.8, -0.1, 0, 1));
-    // scene.addSphere(0.15, Eigen::Vector4d(-0.7, 0.65, 0, 1));
-    // scene.addSphere(0.4, Eigen::Vector4d(0.65, -0.75, 5, 1));
-    // scene.addSphere(0.5, Eigen::Vector4d(0, 0, 5, 1));
-    // scene.addSphere(0.2, Eigen::Vector4d(0.75, 0.75, 4, 1));
-
     return scene;
 }
 
