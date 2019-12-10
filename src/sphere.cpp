@@ -1,6 +1,11 @@
 #include "sphere.hpp"
 
-Sphere::Sphere(double radius, Eigen::Vector4d centerPoint) : radius(radius), centerPoint(centerPoint) {}
+Sphere::Sphere(double radius, Eigen::Vector4d centerPoint) : radius(radius), centerPoint(centerPoint) {
+    // this->texture.load("../textures/stars1.png");
+    // this->texture.load("../textures/stars2.jpg");
+    // this->texture.load("../textures/sun.jpg");
+    this->texture.load("../textures/star.jpg");
+}
 
 void Sphere::setRadius(double radius) {
     this->radius = radius;
@@ -16,15 +21,6 @@ void Sphere::setCenterPoint(Eigen::Vector4d centerPoint) {
 
 Eigen::Vector4d Sphere::getCenterPoint() {
     return this->centerPoint;
-}
-
-Eigen::Vector2d Sphere::calculateUVMapping(Eigen::Vector4d intersectionPoint) {
-    // Reference: https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
-    Eigen::Vector4d surfacePoint = intersectionPoint - this->getCenterPoint();
-    Eigen::Vector4d d = surfacePoint.normalized();
-    double u = 0.5 + atan2(d.z(), d.x())/(2*M_PI);
-    double v = 0.5 - asin(d.y())/M_PI;
-    return Eigen::Vector2d(u, v);
 }
 
 std::string Sphere::getType() {
@@ -54,4 +50,21 @@ double Sphere::calculateIntersectionTime(Ray ray) {
 
 Eigen::Vector4d Sphere::calculateIntersectionNormal(Eigen::Vector4d intersectionPoint) {
     return -(intersectionPoint - this->centerPoint).normalized();
+}
+
+Eigen::Vector2d Sphere::calculateUVMapping(Eigen::Vector4d intersectionPoint) {
+    // Reference: https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere
+    Eigen::Vector4d surfacePoint = intersectionPoint - this->getCenterPoint();
+    Eigen::Vector4d d = surfacePoint.normalized();
+    double u = 0.5 + atan2(d.z(), d.x())/(2*M_PI);
+    double v = 0.5 - asin(d.y())/M_PI;
+    return Eigen::Vector2d(u, v);
+}
+
+std::shared_ptr<Color> Sphere::getTextureColor(Eigen::Vector4d intersectionPoint) {
+    Eigen::Vector2d uv = this->calculateUVMapping(intersectionPoint);
+    LOG_D("UV:\n" << uv);
+    Eigen::Vector4d color = this->texture.at(uv[0], uv[1]);
+    LOG_D("Color:\n" << color);
+    return std::make_shared<Color>(color[0], color[1], color[2]);
 }

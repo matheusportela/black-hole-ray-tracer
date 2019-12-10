@@ -153,8 +153,12 @@ std::shared_ptr<Color> RayTracingRenderer::calculatePixelColor(Scene scene, Ray 
         auto [intersectedStar, tStar] = this->findIntersectedStar(scene, ray);
 
         if (intersectedStar != nullptr) {
-            return intersectedStar->getColor();
+            // return intersectedStar->getColor();
+
             // return this->calculateSpherePixelColor(intersectedStar, ray, tStar) ? ColorFactory::generateBlue() : ColorFactory::generateWhite();
+
+            Eigen::Vector4d intersectionPoint = ray.getPosition() + (ray.getDirection()*tStar);
+            return intersectedStar->getTextureColor(intersectionPoint);
         }
 
         ray = this->updateRay(scene, ray);

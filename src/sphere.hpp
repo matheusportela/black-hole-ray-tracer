@@ -7,6 +7,7 @@
 
 #include <Eigen/Core>
 
+#include "image.hpp"
 #include "surface.hpp"
 #include "ray.hpp"
 
@@ -23,8 +24,10 @@ class Sphere : public Surface {
     std::string getType();
     double calculateIntersectionTime(Ray ray);
     Eigen::Vector4d calculateIntersectionNormal(Eigen::Vector4d intersectionPoint);
+    std::shared_ptr<Color> getTextureColor(Eigen::Vector4d intersectionPoint);
 
   private:
+    Image texture;
     double radius;
     Eigen::Vector4d centerPoint;
 };

@@ -34,8 +34,8 @@ void task6();
 
 int main() {
     // LOG_SET_DEBUG();
-    task1();
-    // task2();
+    // task1();
+    task2();
     // task3();
     // task4();
     // task5();
@@ -53,7 +53,7 @@ Scene createScene1() {
     float radius;
     float x, y, z;
     float rho, theta, psi;
-    std::uniform_real_distribution<float> radius_distribution(0.005, 0.12);
+    std::uniform_real_distribution<float> radius_distribution(0.03, 0.1);
     std::uniform_real_distribution<float> rho_distribution(4.0, 9.0);
     std::uniform_real_distribution<float> theta_distribution(-M_PI, M_PI);
     std::uniform_real_distribution<float> psi_distribution(-M_PI/4, M_PI/4);
