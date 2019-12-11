@@ -25,6 +25,7 @@ class Scene {
     std::vector<std::shared_ptr<Disk>> getAccretionDisks();
 
     void addStar(double radius, Eigen::Vector4d positionPoint);
+    void addUniverse(double radius, Eigen::Vector4d positionPoint);
     void addBlackHole(double radius, Eigen::Vector4d positionPoint);
     void addAccretionDisk(double innerRadius, double outerRadius, Eigen::Vector4d positionPoint, Eigen::Vector4d normal);
 

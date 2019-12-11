@@ -120,7 +120,7 @@ Ray RayTracingRenderer::updateRay(Scene scene, Ray ray) {
         // between 0 and -1.5
         double power_coeff = -1.5;
         // double h2 = 0.0125*black_hole->getRadius();
-        double h2 = 0.5*black_hole->getRadius();
+        double h2 = 1.0*black_hole->getRadius();
         Eigen::Vector4d p = (position - black_hole->getCenterPoint());
         p[3] = 0;
         // Eigen::Vector4d p(position.x(), position.y(), position.z(), 0);

@@ -43,7 +43,17 @@ void Scene::addStar(double radius, Eigen::Vector4d positionPoint) {
     LOG_D("Radius: " << radius);
     LOG_D("Position:\n" << positionPoint);
 
-    std::shared_ptr<Sphere> star = std::make_shared<Sphere>(radius, positionPoint);
+    std::shared_ptr<Sphere> star = std::make_shared<Sphere>(radius, positionPoint, "../textures/star.jpg");
+    star->setColor(ColorFactory::generateWhite());
+    this->stars.push_back(star);
+}
+
+void Scene::addUniverse(double radius, Eigen::Vector4d positionPoint) {
+    LOG_D("Adding universe");
+    LOG_D("Radius: " << radius);
+    LOG_D("Position:\n" << positionPoint);
+
+    std::shared_ptr<Sphere> star = std::make_shared<Sphere>(radius, positionPoint, "../textures/universe.jpg");
     star->setColor(ColorFactory::generateWhite());
     this->stars.push_back(star);
 }

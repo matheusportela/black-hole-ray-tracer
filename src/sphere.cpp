@@ -1,10 +1,14 @@
 #include "sphere.hpp"
 
-Sphere::Sphere(double radius, Eigen::Vector4d centerPoint) : radius(radius), centerPoint(centerPoint) {
+Sphere::Sphere(double radius, Eigen::Vector4d centerPoint, std::string texture) : radius(radius), centerPoint(centerPoint) {
     // this->texture.load("../textures/stars1.png");
     // this->texture.load("../textures/stars2.jpg");
     // this->texture.load("../textures/sun.jpg");
-    this->texture.load("../textures/star.jpg");
+    // this->texture.load("../textures/star.jpg");
+    // this->texture.load("../textures/universe.jpg");
+
+    if (!texture.empty())
+        this->texture.load(texture);
 }
 
 void Sphere::setRadius(double radius) {

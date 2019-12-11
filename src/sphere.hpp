@@ -13,7 +13,7 @@
 
 class Sphere : public Surface {
   public:
-    Sphere(double radius, Eigen::Vector4d centerPoint);
+    Sphere(double radius, Eigen::Vector4d centerPoint, std::string texture = "");
 
     void setRadius(double radius);
     double getRadius();

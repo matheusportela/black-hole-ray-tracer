@@ -22,6 +22,9 @@ Scene createScene2(); // Without accretion disk
 Scene createScene3(); // With accretion disk but without black hole distortion
 Scene createScene4(); // Without accretion disk nor black hole distortion
 Scene createScene5(); // Without accretion disk but with black hole distortion
+Scene createScene6(); // With background texture and no black hole
+Scene createScene7(); // With background texture and black hole but no accretion disk
+Scene createScene8(); // With background texture, black hole and accretion disk
 
 std::shared_ptr<Renderer> createRenderer1(int width, int height);
 
@@ -31,15 +34,23 @@ void task3();
 void task4();
 void task5();
 void task6();
+void task7();
+void task8();
+void task9();
+void task10();
 
 int main() {
     // LOG_SET_DEBUG();
-    task1();
-    task2();
-    task3();
-    task4();
-    task5();
-    task6();
+    // task1();
+    // task2();
+    // task3();
+    // task4();
+    // task5();
+    // task6();
+    // task7();
+    // task8();
+    // task9();
+    task10();
     return 0;
 }
 
@@ -71,7 +82,7 @@ Scene createScene1() {
     }
 
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
-    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -10, 1, 0).normalized());
+    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -30, 1, 0).normalized());
     return scene;
 }
 
@@ -134,7 +145,7 @@ Scene createScene3() {
         scene.addStar(radius, Eigen::Vector4d(x, y, z, 1));
     }
 
-    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -10, 1, 0).normalized());
+    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -30, 1, 0).normalized());
     return scene;
 }
 
@@ -172,7 +183,7 @@ Scene createScene5() {
     std::random_device r;
     std::default_random_engine generator {0};
 
-    Scene scene("Scene 4");
+    Scene scene("Scene 5");
 
     // Creating stars distributed in a sphere
     float radius;
@@ -197,6 +208,39 @@ Scene createScene5() {
 
     scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
 
+    return scene;
+}
+
+Scene createScene6() {
+    std::random_device r;
+    std::default_random_engine generator {0};
+
+    Scene scene("Scene 6");
+
+    scene.addUniverse(5, Eigen::Vector4d(0, 0, 0, 1));
+    return scene;
+}
+
+Scene createScene7() {
+    std::random_device r;
+    std::default_random_engine generator {0};
+
+    Scene scene("Scene 7");
+
+    scene.addUniverse(5, Eigen::Vector4d(0, 0, 0, 1));
+    scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
+    return scene;
+}
+
+Scene createScene8() {
+    std::random_device r;
+    std::default_random_engine generator {0};
+
+    Scene scene("Scene 8");
+
+    scene.addUniverse(5, Eigen::Vector4d(0, 0, 0, 1));
+    scene.addBlackHole(0.25, Eigen::Vector4d(0, 0, 0, 1));
+    scene.addAccretionDisk(1.75, 0.75, Eigen::Vector4d(0, 0, 0, 1), Eigen::Vector4d(4, -30, 1, 0).normalized());
     return scene;
 }
 
@@ -261,4 +305,33 @@ void task6() {
     std::shared_ptr<Renderer> renderer = createRenderer1(300, 300);
     Image image = renderer->render(scene, Renderer::PerspectiveProjection);
     image.save("task6.png");
+}
+
+void task7() {
+    Scene scene = createScene6();
+    LOG_I("Running task 7");
+    std::shared_ptr<Renderer> renderer = createRenderer1(600, 600);
+    renderer->animate(scene, 10, 0.25, "task7", Renderer::PerspectiveProjection);
+}
+
+void task8() {
+    Scene scene = createScene7();
+    LOG_I("Running task 8");
+    std::shared_ptr<Renderer> renderer = createRenderer1(600, 600);
+    renderer->animate(scene, 10, 0.25, "task8", Renderer::PerspectiveProjection);
+}
+
+void task9() {
+    Scene scene = createScene8();
+    LOG_I("Running task 9");
+    std::shared_ptr<Renderer> renderer = createRenderer1(600, 600);
+    renderer->animate(scene, 10, 0.25, "task9", Renderer::PerspectiveProjection);
+}
+
+void task10() {
+    Scene scene = createScene8();
+    LOG_I("Running task 10");
+    std::shared_ptr<Renderer> renderer = createRenderer1(600, 600);
+    Image image = renderer->render(scene, Renderer::PerspectiveProjection);
+    image.save("task10.png");
 }
